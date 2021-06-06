@@ -1,0 +1,30 @@
+.top-container {
+    margin: 20px;
+    padding-top: 20px;
+    margin-bottom: 20px;
+    padding-bottom: 20px;
+}
+form button {
+    margin-left: 10px;
+}
+.middle-container {
+    margin-top: 20px;
+}
+.middle-container label {
+    margin: 10px;
+}
+label.user-register-info {
+    float: right;
+}
+.bottom-container {
+    margin-top: 20px;
+}
+.bottom-container button {
+    margin: 10px;
+}
+.login-errors {
+    color: #dc3545;
+    font-size: 80%;
+    margin-bottom: 10px;
+    display: inline-block;
+}

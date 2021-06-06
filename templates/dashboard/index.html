@@ -1,0 +1,151 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container top-container">
+    <div class="row">
+        <div class="col-md-6">
+            <h3>Welcome {{ request.user.username }}</h3>
+        </div>
+        <div class="col-md-6">
+            <a href="{% url 'change_password' %}" class="btn btn-primary">Change Password</a>
+            <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+        </div>
+    </div>
+    {% if request.user.is_superuser %}
+    <div class="row middle-container">
+            <label class="btn btn-secondary">Total number of Users : {{ user_count }}</label><br>
+            <label class="btn btn-secondary">Total number of Address : {{ address_count }}</label><br>
+            <label class="btn btn-secondary">Total number of Mobile Phones : {{ mobile_count }}</label><br>
+    </div>
+    <div class="row bottom-container">
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#AddUserModal">Add New User</button>
+        <button type="button" class="btn btn-success" data-toggle="modal" data-target="#SendEmailModal">Send Email</button>
+    </div>
+    {% endif %}
+</div>
+<!-- Email Modal -->
+<div class="modal fade" id="SendEmailModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Send Email</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="email-send-form" method="POST">
+            <div class="modal-body">
+                <div id="ajax-alert">
+                </div>
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="email">To Email:</label>
+                    <select class="custom-select" name="email" id="user_email">
+                        {% for email in email_list %}
+                        <option value="{{ email }}">{{ email }}</option>
+                        {% endfor %}
+                      </select>
+                </div>
+                <div class="form-group">
+                    <label for="description">Description:</label>
+                    <textarea class="form-control" rows="5" id="description" name="description"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Send</button>
+        </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!--Email Modal Ends Here-->
+  <!-- Add New User Modal -->
+<div class="modal fade" id="AddUserModal" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLabel">Add User</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <form id="create-user-form" method="POST">
+        <div class="modal-body">
+            <div id="ajax-user-alert">
+            </div>
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" class="form-control" id="username" name="username">
+                
+            </div>
+            <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" name="email">
+            </div>
+            <div class="form-group">
+                <label for="name">Name:</label>
+                <input type="text" class="form-control" id="name" name="name">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" class="form-control" id="password" name="password">
+            </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Add</button>
+        </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- Add New User Modal Ends Here -->
+{% endblock %}
+{% block javascript %}
+<script>
+    $("#create-user-form").submit(function (e) {
+        e.preventDefault();
+        var serializedData = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'add_user' %}",
+            data: serializedData,
+            success: function (response) {
+                $("#create-user-form").trigger('reset');
+                $("#ajax-user-alert").html("<div id='user-alert' class='alert alert-success'>"+response['message']+"</div>");
+                $("#user-alert").alert();
+                setTimeout(function() { $('#user-alert').alert('close'); }, 2000);
+            },
+            error: function (response) {
+                $("#ajax-user-alert").html("<div id='user-alert' class='alert alert-danger'>"+response["responseJSON"]["error"]+"</div>");
+                $("#user-alert").alert();
+                setTimeout(function() { $('#user-alert').alert('close'); }, 2000);
+            }
+        })
+    })
+
+    $("#email-send-form").submit(function (e) {
+        e.preventDefault();
+        var serializedData = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: "{% url 'send_email' %}",
+            data: serializedData,
+            success: function (response) {
+                $("#email-send-form").trigger('reset');
+                $("#ajax-alert").html("<div id='email-alert' class='alert alert-success'>"+response['message']+"</div>");
+                $("#email-alert").alert();
+                setTimeout(function() { $('#email-alert').alert('close'); }, 2000);
+            },
+            error: function (response) {
+                $("#ajax-alert").html("<div id='email-alert' class='alert alert-danger'>"+response["responseJSON"]["error"]+"</div>");
+                $("#email-alert").alert();
+                setTimeout(function() { $('#email-alert').alert('close'); }, 2000);
+            }
+        })
+    })
+</script>
+{% endblock %}
